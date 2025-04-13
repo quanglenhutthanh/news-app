@@ -10,13 +10,13 @@ export interface RssSource {
         name: 'TechCrunch',
         url: 'https://techcrunch.com/feed/',
         category: 'Tech',
-        enabled: true,
+        enabled: false,
     },
     {
         name: 'Dân trí - Trang chủ',
         url: 'https://dantri.com.vn/rss/home.rss',
         category: 'general',
-        enabled: true
+        enabled: false
     },
     {
       name: 'VnExpress - Tin mới nhất',
@@ -34,7 +34,7 @@ export interface RssSource {
       name: 'Tuổi Trẻ - Mới nhất',
       url: 'https://tuoitre.vn/rss/tin-moi-nhat.rss',
       category: 'general',
-      enabled: true
+      enabled: false
     }
   ]
   
