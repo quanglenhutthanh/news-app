@@ -45,7 +45,7 @@ export async function fetchArticlesFromRss(rssUrl: string, source: string): Prom
       articles.push(article)
   
       // Step 2: Tóm tắt 2 bài đầu tiên
-      if (i < 3) {
+      if (i < 5) {
         const html = await axios.get(item.link).then(res => res.data).catch(() => '')
         const dom = new JSDOM(html)
         const text = dom.window.document.body.textContent?.trim().slice(0, 8000) || ''
