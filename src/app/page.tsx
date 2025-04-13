@@ -37,14 +37,22 @@ export default function Home() {
     try {
       const res = await fetch(`/api/rss?name=${encodeURIComponent(nextSource.name)}`)
       const data = await res.json()
-      setAllSummaries(prev => [
-        ...prev,
-        ...data.summaries.map((summary: Summary) => ({
-          source: data.name,
-          summary,
-          articles: data.articles,
-        }))
-      ])
+      setAllSummaries(prev => {
+        const newSummaries: { source: string; summary: Summary; articles: Article[] }[] =
+          data.summaries.map((summary: Summary) => ({
+            source: data.name,
+            summary,
+            articles: data.articles,
+          }));
+
+        const existingIds = new Set(prev.map((item) => item.summary.id));
+        const filteredNew = newSummaries.filter(
+          (item: { source: string; summary: Summary; articles: Article[] }) =>
+            !existingIds.has(item.summary.id)
+        );
+
+        return [...prev, ...filteredNew];
+      });
     } catch (err) {
       console.error('Error loading source:', err)
     } finally {
@@ -85,51 +93,53 @@ export default function Home() {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 6, mb: 6 }}>
-      <Typography
+      {/* <Typography
         variant="h3"
         gutterBottom
         sx={{ fontWeight: 'bold', color: '#1a237e', textAlign: 'center' }}
       >
         Tin tức hôm nay
-      </Typography>
+      </Typography> */}
 
       <Box sx={{ mb: 4, p: 2, backgroundColor: '#f4f6f8', borderRadius: 2 }}>
         <Typography variant="h6" gutterBottom>
-          Tóm tắt:
+          Tóm tắt tin:
         </Typography>
 
         {allSummaries.length > 0 ? (
           allSummaries.map((item, index) => (
             <Box
-  key={`${item.summary.id}-${index}`}
-  sx={{
-    display: 'flex',
-    alignItems: 'flex-start',
-    gap: 2,
-    mt: 2,
-    cursor: 'pointer',
-    '&:hover .summary-title': { textDecoration: 'underline' },
-  }}
-  onClick={() => handleSummaryClick(item.source, item.articles)}
->
-  {item.summary.image && (
-    <Box
-      component="img"
-      src={item.summary.image}
-      alt={item.source}
-      sx={{
-        width: 80,
-        height: 80,
-        objectFit: 'cover',
-        borderRadius: 1,
-        flexShrink: 0,
-      }}
-    />
-  )}
-  <Typography variant="body2" sx={{ color: '#333' }}>
-    <strong className="summary-title">{item.source}</strong> - {item.summary.summary}
-  </Typography>
-</Box>
+              key={`${item.summary.id}-${index}`}
+              sx={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: 2,
+                mt: 2,
+                cursor: 'pointer',
+                '&:hover .summary-title': { textDecoration: 'underline' },
+              }}
+              // onClick={() => handleSummaryClick(item.source, item.articles)}
+            >
+              {item.summary.image && (
+                <Box
+                  component="img"
+                  src={item.summary.image}
+                  alt={item.source}
+                  sx={{
+                    width: 80,
+                    height: 80,
+                    objectFit: 'cover',
+                    borderRadius: 1,
+                    flexShrink: 0,
+                  }}
+                />
+              )}
+              <Typography variant="body2" sx={{ color: '#333' }}>
+                <strong className="summary-title"
+                  onClick={() => handleSummaryClick(item.source, item.articles)}
+                >{item.source}</strong> - {item.summary.summary}
+              </Typography>
+            </Box>
           ))
         ) : (
           !loading && (
@@ -176,7 +186,7 @@ export default function Home() {
           {currentArticles.length > 0 ? (
             <Grid container spacing={3}>
               {currentArticles.map((article) => (
-                <Grid size={{xs:12, sm:6, md:4 }} key={`${article.id}-${Math.random()}`}>
+                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={`${article.id}-${Math.random()}`}>
                   <ArticleCard article={article} />
                 </Grid>
               ))}

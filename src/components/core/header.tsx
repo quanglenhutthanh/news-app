@@ -8,7 +8,7 @@ export default function Header() {
         <AppBar position="static">
             <Toolbar>
                 <Typography variant="h6" component="div">
-                    News App
+                    Tin nhanh
                 </Typography>
             </Toolbar>
         </AppBar>
