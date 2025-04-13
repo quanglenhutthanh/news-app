@@ -176,7 +176,7 @@ export default function Home() {
           {currentArticles.length > 0 ? (
             <Grid container spacing={3}>
               {currentArticles.map((article) => (
-                <Grid item xs={12} sm={6} md={4} key={`${article.id}-${Math.random()}`}>
+                <Grid size={{xs:12, sm:6, md:4 }} key={`${article.id}-${Math.random()}`}>
                   <ArticleCard article={article} />
                 </Grid>
               ))}
