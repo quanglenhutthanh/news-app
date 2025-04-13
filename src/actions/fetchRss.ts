@@ -53,7 +53,7 @@ export async function fetchArticlesFromRss(rssUrl: string, source: string): Prom
         const fullSummary = await getGeminiSummary(text)
         //const shortSummary = fullSummary.slice(0, 300)
   
-        summaries.push({ id, summary: fullSummary })
+        summaries.push({ id, summary: fullSummary, image })
       }
     }
   

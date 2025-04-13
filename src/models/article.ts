@@ -12,4 +12,5 @@ export interface Article {
 export interface Summary {
     id: string;
     summary: string;
+    image: string;
   }

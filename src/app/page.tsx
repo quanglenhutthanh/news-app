@@ -7,18 +7,15 @@ import Container from '@mui/material/Container'
 import Typography from '@mui/material/Typography'
 import { useEffect, useRef, useState } from 'react'
 import {
-  Box, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Button
+  Box, Dialog, DialogActions, DialogContent, DialogTitle, Button, Skeleton
 } from '@mui/material'
 import { rssSources } from '@/models/rss-resources'
 
-interface RssResource {
-  name: string;
-  articles: Article[];
-  summaries: Summary[];
-}
-
 export default function Home() {
-  const [resources, setResources] = useState<RssResource[]>([])
+  const [allSummaries, setAllSummaries] = useState<
+    { source: string; summary: Summary; articles: Article[] }[]
+  >([])
+
   const [loading, setLoading] = useState(false)
   const [visibleCount, setVisibleCount] = useState(0)
   const observerRef = useRef<HTMLDivElement | null>(null)
@@ -40,7 +37,14 @@ export default function Home() {
     try {
       const res = await fetch(`/api/rss?name=${encodeURIComponent(nextSource.name)}`)
       const data = await res.json()
-      setResources(prev => [...prev, data])
+      setAllSummaries(prev => [
+        ...prev,
+        ...data.summaries.map((summary: Summary) => ({
+          source: data.name,
+          summary,
+          articles: data.articles,
+        }))
+      ])
     } catch (err) {
       console.error('Error loading source:', err)
     } finally {
@@ -89,70 +93,68 @@ export default function Home() {
         Tin tức hôm nay
       </Typography>
 
-      {resources.map((resource) => (
-        <Box
-          key={resource.name}
-          sx={{
-            mb: 6,
-            p: 3,
-            borderRadius: 3,
-            boxShadow: 3,
-            background: '#ffffff',
-          }}
-        >
-          <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: '#0d47a1' }}>
-            {resource.name}
-          </Typography>
+      <Box sx={{ mb: 4, p: 2, backgroundColor: '#f4f6f8', borderRadius: 2 }}>
+        <Typography variant="h6" gutterBottom>
+          Tóm tắt:
+        </Typography>
 
-          <Box
-            sx={{
-              mb: 4,
-              mt: 2,
-              p: 3,
-              borderRadius: 2,
-              background: '#e3f2fd',
-            }}
-          >
-            <Typography
-              variant="h6"
-              sx={{ fontWeight: 600, color: '#1565c0', mb: 2 }}
-            >
-              Tóm tắt:
+        {allSummaries.length > 0 ? (
+          allSummaries.map((item, index) => (
+            <Box
+  key={`${item.summary.id}-${index}`}
+  sx={{
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: 2,
+    mt: 2,
+    cursor: 'pointer',
+    '&:hover .summary-title': { textDecoration: 'underline' },
+  }}
+  onClick={() => handleSummaryClick(item.source, item.articles)}
+>
+  {item.summary.image && (
+    <Box
+      component="img"
+      src={item.summary.image}
+      alt={item.source}
+      sx={{
+        width: 80,
+        height: 80,
+        objectFit: 'cover',
+        borderRadius: 1,
+        flexShrink: 0,
+      }}
+    />
+  )}
+  <Typography variant="body2" sx={{ color: '#333' }}>
+    <strong className="summary-title">{item.source}</strong> - {item.summary.summary}
+  </Typography>
+</Box>
+          ))
+        ) : (
+          !loading && (
+            <Typography variant="body2" sx={{ mt: 2, color: '#888' }}>
+              Không có tóm tắt.
             </Typography>
+          )
+        )}
 
-            {resource.summaries.length > 0 ? (
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {resource.summaries.map((summary) => (
-                  <Typography
-                    key={`${summary.id}-${Math.random()}`}
-                    variant="body1"
-                    sx={{
-                      color: '#0d47a1',
-                      cursor: 'pointer',
-                      '&:hover': { textDecoration: 'underline' },
-                    }}
-                    onClick={() => handleSummaryClick(resource.name, resource.articles)}
-                  >
-                    • {summary.summary}
-                  </Typography>
-                ))}
-              </Box>
-            ) : (
-              <Typography variant="body2" sx={{ color: '#607d8b' }}>
-                Không có tóm tắt.
-              </Typography>
-            )}
-          </Box>
-        </Box>
-      ))}
+        {loading && (
+          <>
+            {[...Array(3)].map((_, idx) => (
+              <Skeleton
+                key={idx}
+                variant="text"
+                height={30}
+                animation="wave"
+                sx={{ mt: 2 }}
+              />
+            ))}
+          </>
+        )}
+      </Box>
 
       <div ref={observerRef} />
-
-      {loading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6 }}>
-          <CircularProgress color="primary" />
-        </Box>
-      )}
 
       {/* Dialog hiển thị danh sách bài viết */}
       <Dialog
@@ -174,7 +176,7 @@ export default function Home() {
           {currentArticles.length > 0 ? (
             <Grid container spacing={3}>
               {currentArticles.map((article) => (
-                <Grid  size={{ xs:12, sm:6, md:4}} key={`${article.id} - ${Math.random()}`}>
+                <Grid item xs={12} sm={6} md={4} key={`${article.id}-${Math.random()}`}>
                   <ArticleCard article={article} />
                 </Grid>
               ))}
