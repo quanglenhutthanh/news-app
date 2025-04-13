@@ -35,7 +35,7 @@ export async function GET(req: Request) {
   }
 
   try {
-    const { articles, summaries } = await fetchArticlesFromRss(source.url, source.name)
+    const { articles, summaries } = await fetchArticlesFromRss(source.url, source.name, source.language)
     return NextResponse.json({
       name: source.name,
       articles,

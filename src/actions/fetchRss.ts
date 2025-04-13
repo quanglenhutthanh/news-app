@@ -5,7 +5,7 @@ import { Article, Summary } from '@/models/article'
 
 const GEMINI_API_URL = process.env.NEXT_PUBLIC_GEMINI_API as string;
 
-export async function fetchArticlesFromRss(rssUrl: string, source: string): Promise<{
+export async function fetchArticlesFromRss(rssUrl: string, source: string,language: string): Promise<{
     articles: Article[]
     summaries: { id: string; summary: string }[]
   }> {
@@ -50,7 +50,7 @@ export async function fetchArticlesFromRss(rssUrl: string, source: string): Prom
         const dom = new JSDOM(html)
         const text = dom.window.document.body.textContent?.trim().slice(0, 8000) || ''
   
-        const fullSummary = await getGeminiSummary(text)
+        const fullSummary = await getGeminiSummary(text, language)
         //const shortSummary = fullSummary.slice(0, 300)
   
         summaries.push({ id, summary: fullSummary, image })
@@ -61,8 +61,13 @@ export async function fetchArticlesFromRss(rssUrl: string, source: string): Prom
   }
 
 // Function to summarize using Gemini API
-async function getGeminiSummary(content: string): Promise<string> {
-  const prompt = `Tóm tắt nội dung sau bằng tiếng Việt với 300 kí tự:\n\n${content}`
+async function getGeminiSummary(content: string, language:string): Promise<string> {
+  const prompt =
+    language === 'vi'
+      ? `Tóm tắt nội dung sau bằng tiếng Việt với độ dài khoảng 300 ký tự:\n\n${content}`
+      : `Summarize the following content in English in about 500 characters:\n\n${content}`
+
+
 
   try {
     const response = await axios.post(GEMINI_API_URL, {
