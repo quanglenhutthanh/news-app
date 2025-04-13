@@ -42,6 +42,7 @@ export async function GET(req: Request) {
       summaries,
     })
   } catch (err) {
+    console.log(err);
     return NextResponse.json({ error: 'Failed to fetch RSS data' }, { status: 500 })
   }
 }
