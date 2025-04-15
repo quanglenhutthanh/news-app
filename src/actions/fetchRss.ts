@@ -82,6 +82,6 @@ async function getGeminiSummary(content: string, language:string): Promise<strin
     return result || 'Không thể tóm tắt nội dung.'
   } catch (error) {
     console.error('Gemini API error:', error)
-    return 'Lỗi khi gọi Gemini API.'
+    return 'Lỗi khi gọi Gemini API. ' + error
   }
 }
